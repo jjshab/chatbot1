@@ -1,0 +1,126 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #f0f0f0;
+      font-family: Arial, sans-serif;
+    }
+
+
+    #chatbox {
+      border: 3px solid #ccc;
+      padding: 60px;
+      width: 900px;
+      background-color: #fff;
+      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    }
+
+
+    #chatlogs {
+      height: 200px;
+      overflow-y: auto;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      padding: 10px;
+    }
+
+
+    #chatlogs div {
+      margin-bottom: 10px;
+    }
+
+
+    #query {
+      width: 100%;
+      padding: 5px;
+    }
+  </style>
+</head>
+<body>
+
+
+  <h2>Content Master PRO</h2>
+
+
+  <div id="chatbox">
+    <div id="chatlogs">
+      <!-- Chat logs will be inserted here -->
+    </div>
+
+
+    <form id="chatForm">
+      <input type="text" id="query" name="query" placeholder="Type your message here...">
+      <input type="submit" value="Submit">
+    </form>
+  </div>
+
+
+  <div id="output"></div>
+  <!-- The output of the chat will be displayed here -->
+
+
+  <script>
+    document.getElementById('chatForm').addEventListener('submit', function (event) {
+      event.preventDefault();
+
+
+      var query = document.getElementById('query').value;
+      var chatlogs = document.getElementById('chatlogs');
+
+
+      // Append user's query to chatlogs
+      var userDiv = document.createElement('div');
+      userDiv.innerHTML = `<strong>You:</strong> ${query}`;
+      chatlogs.appendChild(userDiv);
+
+
+      fetch('/query', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: query,
+        }),
+      })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          return response.json();
+        })
+
+
+        .then(data => {
+  // Check if the data has a 'response' key
+          if (data.hasOwnProperty('response')) {
+    // Append bot's response to chatlogs
+            var botDiv = document.createElement('div');
+            botDiv.innerHTML = `<strong>Bot:</strong> ${data.response}`;
+            chatlogs.appendChild(botDiv);   // Display the output of the chat in the output div
+          } else {
+            console.error('The server\'s response doesn\'t have a \'response\' key');
+          }
+        })
+
+
+        .catch((error) => {
+          console.error('Error:', error);
+        });
+
+
+      // Clear the query input field
+      document.getElementById('query').value = '';
+    });
+  </script>
+
+
+</body>
+
+
+</html>
